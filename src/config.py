@@ -12,6 +12,20 @@ env_path = Path(__file__).parent.parent / '.env'
 load_dotenv(env_path)
 
 
+def _normalize_separators(value: str) -> str:
+    """
+    将中文分隔符统一替换为英文分隔符
+    避免用户在 .env 中误用中文逗号导致解析失败
+    """
+    if not value:
+        return value
+    # 全角逗号、顿号、分号 → 英文逗号
+    for ch in ['\uff0c', '\u3001', '\uff1b']:
+        value = value.replace(ch, ',')
+    # 去除多余空格
+    return value
+
+
 # 预设的模型配置
 MODEL_PRESETS = {
     "deepseek": {
@@ -83,8 +97,8 @@ class Config:
 
     # 课程配置（逗号分隔，可配置多门课）
     # 留空则自动从 SaaS 页面发现课程（推荐）
-    COURSE_IDS: str = os.getenv('COURSE_IDS', '')
-    COURSE_NAMES: str = os.getenv('COURSE_NAMES', '')
+    COURSE_IDS: str = _normalize_separators(os.getenv('COURSE_IDS', ''))
+    COURSE_NAMES: str = _normalize_separators(os.getenv('COURSE_NAMES', ''))
     
     # AI配置
     AI_PROVIDER: str = os.getenv('AI_PROVIDER', 'deepseek')

@@ -1,6 +1,6 @@
 """
 蓝桥SaaS平台自动化周报系统 - 主程序
-V4.0 — 支持可视化章节选择，基于选择内容生成周报
+V4.1 — 可视化章节选择 + 兼容性增强
 """
 
 import sys
@@ -17,8 +17,8 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     except Exception:
         pass
 
-# 添加src到路径
-sys.path.insert(0, ".")
+# 添加src到路径（使用绝对路径，确保从任意工作目录运行都能正确 import）
+sys.path.insert(0, str(Path(__file__).parent))
 
 from src.config import config, Config
 from src.logger import logger
@@ -506,7 +506,7 @@ def _submit_to_lanqiao(weekly_content: dict, course_name: str) -> bool:
 def main():
     """主入口函数"""
     parser = argparse.ArgumentParser(
-        description="蓝桥SaaS平台自动化周报系统 V4.0 — 可视化选择版",
+        description="蓝桥SaaS平台自动化周报系统 V4.1 — 可视化选择版",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     
@@ -521,7 +521,7 @@ def main():
     
     print("""
 ╔══════════════════════════════════════════════════════════════╗
-║     蓝桥SaaS平台自动化周报系统 V4.0                          ║
+║     蓝桥SaaS平台自动化周报系统 V4.1                          ║
 ║     可视化章节选择 · 基于选择内容生成                         ║
 ╚══════════════════════════════════════════════════════════════╝
     """)

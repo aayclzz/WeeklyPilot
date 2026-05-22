@@ -5,7 +5,10 @@
 
 import sys
 import time
-sys.path.insert(0, ".")
+from pathlib import Path
+
+# 使用绝对路径，确保从任意工作目录运行都能正确 import
+sys.path.insert(0, str(Path(__file__).parent))
 
 from src.config import config
 from src.browser import browser

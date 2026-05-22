@@ -7,7 +7,9 @@
 import os
 import time
 import shutil
+import glob
 import subprocess
+import tempfile
 from typing import List
 from datetime import datetime
 from pathlib import Path
@@ -48,6 +50,24 @@ def cleanup_browser_processes(browser_type: str = "all"):
         logger.debug(f"清理进程时出错：{e}")
 
 
+def cleanup_stale_temp_dirs():
+    """清理之前崩溃遗留的浏览器临时目录"""
+    try:
+        temp_base = tempfile.gettempdir()
+        for prefix in ["lanqiao_edge_", "lanqiao_chrome_"]:
+            for dir_path in glob.glob(os.path.join(temp_base, prefix + "*")):
+                try:
+                    # 只清理超过 1 天的目录（避免清理正在使用的）
+                    dir_age = time.time() - os.path.getmtime(dir_path)
+                    if dir_age > 86400:  # 24 hours
+                        shutil.rmtree(dir_path, ignore_errors=True)
+                        logger.debug(f"已清理过期临时目录：{dir_path}")
+                except Exception:
+                    pass
+    except Exception as e:
+        logger.debug(f"清理临时目录时出错：{e}")
+
+
 class BrowserManager:
     """浏览器管理器（独立实例，不影响用户浏览器）"""
     
@@ -57,6 +77,9 @@ class BrowserManager:
         self._initialized = False
         self._browser_type = None
         self._temp_dir = None  # 跟踪临时目录，用于清理
+        
+        # 清理之前崩溃遗留的临时目录
+        cleanup_stale_temp_dirs()
         
         # 创建本次运行的截图目录
         self.screenshot_dir = config.SCREENSHOTS_DIR / log_manager.get_run_time()
@@ -96,14 +119,26 @@ class BrowserManager:
         """初始化指定类型的浏览器"""
         logger.info(f"尝试使用 {browser_type.upper()} 浏览器...")
         
-        if browser_type == "edge":
-            self._init_edge()
-        elif browser_type == "chrome":
-            self._init_chrome()
-        elif browser_type == "firefox":
-            self._init_firefox()
-        else:
-            raise ValueError(f"不支持的浏览器类型：{browser_type}")
+        try:
+            if browser_type == "edge":
+                self._init_edge()
+            elif browser_type == "chrome":
+                self._init_chrome()
+            elif browser_type == "firefox":
+                self._init_firefox()
+            else:
+                raise ValueError(f"不支持的浏览器类型：{browser_type}")
+        except Exception as e:
+            error_msg = str(e).lower()
+            # 驱动版本不匹配的常见错误信息
+            if "version" in error_msg or "mismatch" in error_msg or "session not created" in error_msg:
+                logger.error(f"{browser_type.upper()} 浏览器驱动版本不匹配！")
+                logger.error("请尝试以下解决方案：")
+                logger.error("  1. 更新浏览器到最新版本")
+                logger.error("  2. Selenium 4.6+ 会自动下载匹配的驱动，请确保 pip 包是最新的：")
+                logger.error("     pip install --upgrade selenium")
+                logger.error("  3. 或在 .env 中手动指定 CHROMEDRIVER_PATH")
+            raise
         
         self._browser_type = browser_type
         logger.info(f"{browser_type.upper()} 浏览器初始化成功")

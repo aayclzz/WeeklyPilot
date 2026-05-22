@@ -8,8 +8,8 @@
 #   pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 # ==================================================
 
-# 浏览器自动化
-selenium>=4.15.0
+# 浏览器自动化（4.6+ 支持自动下载匹配的浏览器驱动）
+selenium>=4.6.0
 
 # AI接口
 openai>=1.0.0
