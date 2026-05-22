@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>章节选择器</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030304;
+            --surface: #18181b;
+            --surface-hover: #1f1f23;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --text: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #52525b;
+            --accent: #3b82f6;
+            --accent-soft: rgba(59, 130, 246, 0.1);
+            --success: #22c55e;
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 40vh;
+            background: radial-gradient(ellipse at top, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 2rem 3rem;
+        }
+        
+        .header {
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+        
+        .course-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.5rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.8125rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .course-badge .dot {
+            width: 8px; height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 0.375rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            padding: 0.375rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            width: fit-content;
+        }
+        
+        .tool-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 0.875rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .tool-btn:hover {
+            background: var(--surface-hover);
+            color: var(--text);
+        }
+        
+        .tool-separator {
+            width: 1px;
+            background: var(--border);
+            margin: 0.25rem 0;
+        }
+        
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text);
+            font-size: 0.875rem;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+        
+        .search-input::placeholder { color: var(--text-muted); }
+        
+        .search-icon {
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.125rem; height: 1.125rem;
+            color: var(--text-muted);
+        }
+        
+        .content {
+            display: flex;
+            gap: 1.25rem;
+        }
+        
+        .chapters-panel {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .chapters-scroll {
+            max-height: 62vh;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+        
+        .course {
+            margin-bottom: 1rem;
+            background: var(--bg);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        
+        .course:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px var(--accent-soft);
+        }
+        
+        .course-header {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            background: var(--accent-soft);
+        }
+        
+        .course-header:hover {
+            background: rgba(59, 130, 246, 0.15);
+        }
+        
+        .course-title {
+            flex: 1;
+            font-size: 1.0625rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .course-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .course-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            padding: 0.25rem 0.625rem;
+            border-radius: 100px;
+        }
+        
+        .course-body {
+            padding: 0.75rem;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .course.collapsed .course-body {
+            max-height: 0 !important;
+            padding: 0 0.75rem;
+        }
+        
+        .chapter {
+            margin-bottom: 0.75rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        
+        .chapter:hover {
+            border-color: var(--border-hover);
+        }
+        
+        .chapter-header {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 1rem 1.125rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+        
+        .chapter-header:hover {
+            background: var(--surface-hover);
+        }
+        
+        .checkbox {
+            width: 1.25rem; height: 1.25rem;
+            border: 2px solid var(--text-muted);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .checkbox:hover {
+            border-color: var(--accent);
+        }
+        
+        .checkbox.checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .checkbox.indeterminate {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .checkbox.indeterminate::after {
+            content: '—';
+            color: white;
+            font-size: 12px;
+        }
+        
+        .chapter-title {
+            flex: 1;
+            font-size: 0.9375rem;
+            font-weight: 600;
+        }
+        
+        .chapter-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .chapter-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            padding: 0.25rem 0.625rem;
+            border-radius: 100px;
+        }
+        
+        .toggle-arrow {
+            width: 1.25rem; height: 1.25rem;
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        
+        .collapsed > .course-header .toggle-arrow,
+        .collapsed > .chapter-header .toggle-arrow,
+        .collapsed > .section-header .toggle-arrow {
+            transform: rotate(-90deg);
+        }
+        
+        .chapter-body {
+            border-top: 1px solid var(--border);
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .chapter.collapsed .chapter-body {
+            max-height: 0 !important;
+            border-top: none;
+        }
+        
+        .section {
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.75rem 1.125rem 0.75rem 2.75rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+        
+        .section-header:hover {
+            background: var(--surface-hover);
+        }
+        
+        .section-title {
+            flex: 1;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .section-count {
+            font-size: 0.6875rem;
+            color: var(--text-muted);
+        }
+        
+        .section-body {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .section.collapsed .section-body {
+            max-height: 0 !important;
+        }
+        
+        .items-container {
+            padding: 0 0.5rem 0.5rem 3.5rem;
+        }
+        
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.625rem 0.75rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .item:hover {
+            background: var(--surface-hover);
+        }
+        
+        .item .checkbox {
+            width: 1.125rem; height: 1.125rem;
+            border-radius: 5px;
+        }
+        
+        .item-name {
+            flex: 1;
+            font-size: 0.8125rem;
+        }
+        
+        .item-type {
+            font-size: 0.6875rem;
+            padding: 0.1875rem 0.5rem;
+            border-radius: 100px;
+            background: var(--bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        
+        .selected-panel {
+            width: 320px;
+            flex-shrink: 0;
+        }
+        
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: sticky;
+            top: 2rem;
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .panel-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .panel-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            padding: 0.25rem 0.625rem;
+            border-radius: 100px;
+        }
+        
+        .panel-body {
+            padding: 0.75rem;
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        
+        .selected-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.625rem 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+            font-size: 0.8125rem;
+            transition: all 0.15s ease;
+        }
+        
+        .selected-item:hover {
+            border-color: var(--border-hover);
+        }
+        
+        .selected-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .remove-btn {
+            width: 1.375rem; height: 1.375rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+        
+        .remove-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+        
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding: 1.25rem 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+        
+        .footer-info {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .footer-info strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+        
+        .footer-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-ghost:hover {
+            background: var(--surface-hover);
+            color: var(--text);
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+        
+        .highlight {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent);
+            padding: 0 0.125rem;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>章节选择器</h1>
+            <p>选择需要写入周报的章节和小节</p>
+        </div>
+        
+        <div class="course-badge" id="courseBadge" style="display:none;">
+            <span class="dot"></span>
+            <span id="courseName">加载中...</span>
+        </div>
+        
+        <div class="toolbar">
+            <button class="tool-btn" onclick="selectAll()">全选</button>
+            <button class="tool-btn" onclick="selectNone()">取消全选</button>
+            <div class="tool-separator"></div>
+            <button class="tool-btn" onclick="expandAll()">展开全部</button>
+            <button class="tool-btn" onclick="collapseAll()">折叠全部</button>
+        </div>
+        
+        <div class="search-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+            </svg>
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索章节或小节...">
+        </div>
+        
+        <div class="content">
+            <div class="chapters-panel">
+                <div class="chapters-scroll" id="chaptersList">
+                    <div class="empty-state">加载中...</div>
+                </div>
+            </div>
+            
+            <div class="selected-panel">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <span class="panel-title">已选择</span>
+                        <span class="panel-count" id="selectedCount">0 项</span>
+                    </div>
+                    <div class="panel-body" id="selectedList">
+                        <div class="empty-state">暂无选择</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="footer-info">
+                已选择 <strong id="totalCount">0</strong> 项内容
+            </div>
+            <div class="footer-actions">
+                <button class="btn btn-ghost" onclick="cancel()">取消</button>
+                <button class="btn btn-primary" id="btnConfirm" onclick="confirmSelection()" disabled>确认选择</button>
+            </div>
+        </div>
+        
+        <!-- 免责声明 -->
+        <div class="disclaimer" style="margin-top: 2rem; padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);">
+            <h3 style="color: #ef4444; font-size: 1rem; margin-bottom: 0.75rem; font-weight: 600;">⚠️ 免责声明</h3>
+            <p style="color: var(--text-secondary); font-size: 0.8125rem; line-height: 1.6; margin-bottom: 0.75rem;">
+                本工具仅供学习交流使用，旨在帮助用户提高学习效率。使用本工具生成的内容仅供参考，请勿直接用于正式提交的周报或作业。
+            </p>
+            <p style="color: var(--text-secondary); font-size: 0.8125rem; line-height: 1.6; margin-bottom: 0.75rem;">
+                <strong style="color: #ef4444;">重要警告：</strong>严禁将本工具用于任何违法用途或商业用途。任何因使用本工具而产生的法律责任，由使用者自行承担，与开发者无关。
+            </p>
+            <p style="color: var(--text-secondary); font-size: 0.8125rem; line-height: 1.6;">
+                使用本工具即表示您已阅读并同意上述声明。如有违反，一切后果由使用者自行承担。
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        let catalogsData = [];  // 存储所有课程的目录数据
+        let selectedItems = new Set();
+        let expandedCourses = new Set();  // 保存展开的课程状态
+        let expandedChapters = new Set();  // 保存展开的章节状态
+        let expandedSections = new Set();  // 保存展开的小节状态
+        let searchTimer = null;  // 搜索防抖定时器
+        
+        async function loadCatalog() {
+            try {
+                // 尝试获取所有课程目录
+                const response = await fetch('/api/all-catalogs');
+                if (!response.ok) throw new Error('获取目录失败');
+                
+                const data = await response.json();
+                catalogsData = data.courses || [];
+                
+                if (catalogsData.length === 0) {
+                    document.getElementById('chaptersList').innerHTML = '<div class="empty-state">未找到课程目录</div>';
+                    return;
+                }
+                
+                // 显示课程信息
+                const courseNames = catalogsData.map(c => c.course_name).join('、');
+                document.getElementById('courseBadge').style.display = 'inline-flex';
+                document.getElementById('courseName').textContent = courseNames;
+                
+                // 默认关闭所有课程目录
+                renderCatalog();
+            } catch (error) {
+                // 如果获取所有课程失败，尝试单课程模式
+                const params = new URLSearchParams(window.location.search);
+                const courseId = params.get('course_id');
+                if (courseId) {
+                    try {
+                        const response = await fetch(`/api/catalog/${courseId}`);
+                        if (!response.ok) throw new Error('获取目录失败');
+                        const catalog = await response.json();
+                        catalogsData = [catalog];
+                        // 默认关闭目录
+                        document.getElementById('courseBadge').style.display = 'inline-flex';
+                        document.getElementById('courseName').textContent = catalog.course_name;
+                        renderCatalog();
+                    } catch (e) {
+                        document.getElementById('chaptersList').innerHTML = 
+                            `<div class="empty-state">加载失败: ${e.message}</div>`;
+                    }
+                } else {
+                    document.getElementById('chaptersList').innerHTML = 
+                        `<div class="empty-state">加载失败: ${error.message}</div>`;
+                }
+            }
+        }
+        
+        function renderCatalog(filter = '') {
+            if (!catalogsData || catalogsData.length === 0) return;
+            
+            // 保存当前展开状态（仅在非首次渲染时）
+            if (filter === '' && document.querySelectorAll('.course').length > 0) {
+                saveExpandedState();
+            }
+            
+            const chaptersList = document.getElementById('chaptersList');
+            let html = '';
+            
+            const filterLower = filter.toLowerCase();
+            
+            catalogsData.forEach((catalog, courseIdx) => {
+                let hasVisibleChapter = false;
+                let chaptersHtml = '';
+                
+                catalog.chapters.forEach((chapter, chIdx) => {
+                    const chapterMatch = chapter.name.toLowerCase().includes(filterLower);
+                    let hasVisibleSection = false;
+                    let sectionsHtml = '';
+                    
+                    chapter.sections.forEach((section, secIdx) => {
+                        const sectionMatch = section.name.toLowerCase().includes(filterLower);
+                        const itemsMatch = section.items.some(item => 
+                            item.name.toLowerCase().includes(filterLower)
+                        );
+                        
+                        if (!chapterMatch && !sectionMatch && !itemsMatch) return;
+                        hasVisibleSection = true;
+                        hasVisibleChapter = true;
+                        
+                        const sectionChecked = isSectionSelected(courseIdx, chIdx, secIdx);
+                        const isSectionExpanded = expandedSections.has(`${courseIdx}_${chIdx}_${secIdx}`);
+                        
+                        let itemsHtml = '';
+                        section.items.forEach((item, itemIdx) => {
+                            const itemKey = `${courseIdx}_${chIdx}_${secIdx}_${itemIdx}`;
+                            const isChecked = selectedItems.has(itemKey);
+                            const typeNames = {'video': '视频', 'doc': '文档', 'lab': '实验'};
+                            const typeName = typeNames[item.type] || item.type;
+                            
+                            itemsHtml += `
+                                <div class="item" data-action="toggleItem" data-course="${courseIdx}" data-ch="${chIdx}" data-sec="${secIdx}" data-item="${itemIdx}">
+                                    <div class="checkbox ${isChecked ? 'checked' : ''}" data-action="toggleItem" data-course="${courseIdx}" data-ch="${chIdx}" data-sec="${secIdx}" data-item="${itemIdx}"></div>
+                                    <span class="item-name">${highlightText(item.name, filter)}</span>
+                                    <span class="item-type">${escapeHtml(typeName)}</span>
+                                </div>
+                            `;
+                        });
+                        
+                        sectionsHtml += `
+                            <div class="section ${isSectionExpanded ? '' : 'collapsed'}" id="section_${courseIdx}_${chIdx}_${secIdx}">
+                                <div class="section-header" data-action="toggleSectionBody" data-course="${courseIdx}" data-ch="${chIdx}" data-sec="${secIdx}">
+                                    <div class="checkbox ${sectionChecked ? 'checked' : ''}" data-action="toggleSection" data-course="${courseIdx}" data-ch="${chIdx}" data-sec="${secIdx}"></div>
+                                    <span class="section-title">${highlightText(section.name, filter)}</span>
+                                    <span class="section-count">${section.items.length}</span>
+                                    <div class="toggle-arrow">▼</div>
+                                </div>
+                                <div class="section-body">
+                                    <div class="items-container">${itemsHtml}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    if (!hasVisibleSection) return;
+                    
+                    const isChapterExpanded = expandedChapters.has(`${courseIdx}_${chIdx}`);
+                    
+                    chaptersHtml += `
+                        <div class="chapter ${isChapterExpanded ? '' : 'collapsed'}" id="chapter_${courseIdx}_${chIdx}">
+                            <div class="chapter-header" data-action="toggleChapter" data-course="${courseIdx}" data-ch="${chIdx}">
+                                <span class="chapter-title">${highlightText(chapter.name, filter)}</span>
+                                <div class="chapter-meta">
+                                    <span class="chapter-count">${chapter.sections.length} 节</span>
+                                    <div class="toggle-arrow">▼</div>
+                                </div>
+                            </div>
+                            <div class="chapter-body">
+                                ${sectionsHtml}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                if (!hasVisibleChapter) return;
+                
+                const isCourseExpanded = expandedCourses.has(courseIdx);
+                
+                html += `
+                    <div class="course ${isCourseExpanded ? '' : 'collapsed'}" id="course_${courseIdx}">
+                        <div class="course-header" data-action="toggleCourse" data-course="${courseIdx}">
+                            <span class="course-title">${highlightText(catalog.course_name, filter)}</span>
+                            <div class="course-meta">
+                                <span class="course-count">${catalog.chapters.length} 章</span>
+                                <div class="toggle-arrow">▼</div>
+                            </div>
+                        </div>
+                        <div class="course-body">
+                            ${chaptersHtml}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if (!html) {
+                html = '<div class="empty-state">未找到匹配的内容</div>';
+            }
+            
+            chaptersList.innerHTML = html;
+            
+            // 使用事件委托
+            chaptersList.onclick = handleClick;
+            
+            // 恢复展开状态
+            restoreExpandedState();
+            
+            renderSelectedList();
+            updateCount();
+        }
+        
+        function saveExpandedState() {
+            // 保存课程展开状态
+            document.querySelectorAll('.course').forEach(el => {
+                const courseIdx = parseInt(el.id.replace('course_', ''));
+                if (!el.classList.contains('collapsed')) {
+                    expandedCourses.add(courseIdx);
+                } else {
+                    expandedCourses.delete(courseIdx);
+                }
+            });
+            
+            // 保存章节展开状态
+            document.querySelectorAll('.chapter').forEach(el => {
+                const match = el.id.match(/chapter_(\d+)_(\d+)/);
+                if (match) {
+                    const key = `${match[1]}_${match[2]}`;
+                    if (!el.classList.contains('collapsed')) {
+                        expandedChapters.add(key);
+                    } else {
+                        expandedChapters.delete(key);
+                    }
+                }
+            });
+            
+            // 保存小节展开状态
+            document.querySelectorAll('.section').forEach(el => {
+                const match = el.id.match(/section_(\d+)_(\d+)_(\d+)/);
+                if (match) {
+                    const key = `${match[1]}_${match[2]}_${match[3]}`;
+                    if (!el.classList.contains('collapsed')) {
+                        expandedSections.add(key);
+                    } else {
+                        expandedSections.delete(key);
+                    }
+                }
+            });
+        }
+        
+        function restoreExpandedState() {
+            // 先恢复小节展开状态（子元素先展开）
+            expandedSections.forEach(key => {
+                const el = document.getElementById(`section_${key}`);
+                if (el) {
+                    el.classList.remove('collapsed');
+                    const body = el.querySelector('.section-body');
+                    if (body) {
+                        body.style.maxHeight = 'none';
+                    }
+                }
+            });
+            
+            // 再恢复章节展开状态
+            expandedChapters.forEach(key => {
+                const el = document.getElementById(`chapter_${key}`);
+                if (el) {
+                    el.classList.remove('collapsed');
+                    const body = el.querySelector('.chapter-body');
+                    if (body) {
+                        body.style.maxHeight = 'none';
+                    }
+                }
+            });
+            
+            // 最后恢复课程展开状态
+            expandedCourses.forEach(courseIdx => {
+                const el = document.getElementById(`course_${courseIdx}`);
+                if (el) {
+                    el.classList.remove('collapsed');
+                    const body = el.querySelector('.course-body');
+                    if (body) {
+                        body.style.maxHeight = 'none';
+                    }
+                }
+            });
+        }
+        
+        function updateParentHeight(el) {
+            // 更新父元素的 max-height
+            const section = el.closest('.section');
+            if (section && !section.classList.contains('collapsed')) {
+                const sectionBody = section.querySelector('.section-body');
+                if (sectionBody) {
+                    sectionBody.style.maxHeight = 'none';
+                }
+            }
+            
+            const chapter = el.closest('.chapter');
+            if (chapter && !chapter.classList.contains('collapsed')) {
+                const chapterBody = chapter.querySelector('.chapter-body');
+                if (chapterBody) {
+                    chapterBody.style.maxHeight = 'none';
+                }
+            }
+            
+            const course = el.closest('.course');
+            if (course && !course.classList.contains('collapsed')) {
+                const courseBody = course.querySelector('.course-body');
+                if (courseBody) {
+                    courseBody.style.maxHeight = 'none';
+                }
+            }
+        }
+        
+        function handleClick(e) {
+            const target = e.target.closest('[data-action]');
+            if (!target) return;
+            
+            const action = target.dataset.action;
+            const courseIdx = parseInt(target.dataset.course);
+            const chIdx = parseInt(target.dataset.ch);
+            const secIdx = parseInt(target.dataset.sec);
+            const itemIdx = parseInt(target.dataset.item);
+            
+            e.stopPropagation();
+            
+            switch(action) {
+                case 'toggleCourse':
+                    toggleCourse(courseIdx);
+                    break;
+                case 'toggleChapter':
+                    toggleChapter(courseIdx, chIdx);
+                    break;
+                case 'toggleSectionBody':
+                    toggleSectionBody(courseIdx, chIdx, secIdx);
+                    break;
+                case 'toggleSection':
+                    toggleSection(courseIdx, chIdx, secIdx);
+                    break;
+                case 'toggleItem':
+                    toggleItem(courseIdx, chIdx, secIdx, itemIdx);
+                    break;
+            }
+        }
+        
+        function renderSelectedList() {
+            const selectedList = document.getElementById('selectedList');
+            
+            if (selectedItems.size === 0) {
+                selectedList.innerHTML = '<div class="empty-state">暂无选择</div>';
+                return;
+            }
+            
+            let html = '';
+            selectedItems.forEach(key => {
+                const [courseIdx, chIdx, secIdx, itemIdx] = key.split('_').map(Number);
+                const catalog = catalogsData[courseIdx];
+                const chapter = catalog.chapters[chIdx];
+                const section = chapter.sections[secIdx];
+                const item = section.items[itemIdx];
+                
+                html += `
+                    <div class="selected-item">
+                        <span>${escapeHtml(item.name)}</span>
+                        <button class="remove-btn" onclick="removeItem(${courseIdx}, ${chIdx}, ${secIdx}, ${itemIdx})">×</button>
+                    </div>
+                `;
+            });
+            
+            selectedList.innerHTML = html;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function highlightText(text, filter) {
+            const escaped = escapeHtml(text);
+            if (!filter) return escaped;
+            const escapedFilter = escapeHtml(filter);
+            const regex = new RegExp(`(${escapedFilter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return escaped.replace(regex, '<span class="highlight">$1</span>');
+        }
+        
+        function toggleCourse(courseIdx) {
+            const el = document.getElementById(`course_${courseIdx}`);
+            if (!el) return;
+            
+            const body = el.querySelector('.course-body');
+            const isCollapsed = el.classList.contains('collapsed');
+            
+            if (isCollapsed) {
+                el.classList.remove('collapsed');
+                body.style.maxHeight = 'none';
+                expandedCourses.add(courseIdx);
+            } else {
+                body.style.maxHeight = '0';
+                el.classList.add('collapsed');
+                expandedCourses.delete(courseIdx);
+            }
+        }
+        
+        function toggleChapter(courseIdx, chIdx) {
+            const el = document.getElementById(`chapter_${courseIdx}_${chIdx}`);
+            if (!el) return;
+            
+            const body = el.querySelector('.chapter-body');
+            const isCollapsed = el.classList.contains('collapsed');
+            const key = `${courseIdx}_${chIdx}`;
+            
+            if (isCollapsed) {
+                el.classList.remove('collapsed');
+                body.style.maxHeight = 'none';
+                expandedChapters.add(key);
+                updateParentHeight(el);
+            } else {
+                body.style.maxHeight = '0';
+                el.classList.add('collapsed');
+                expandedChapters.delete(key);
+            }
+        }
+        
+        function toggleSectionBody(courseIdx, chIdx, secIdx) {
+            const el = document.getElementById(`section_${courseIdx}_${chIdx}_${secIdx}`);
+            if (!el) return;
+            
+            const body = el.querySelector('.section-body');
+            const isCollapsed = el.classList.contains('collapsed');
+            const key = `${courseIdx}_${chIdx}_${secIdx}`;
+            
+            if (isCollapsed) {
+                el.classList.remove('collapsed');
+                body.style.maxHeight = 'none';
+                expandedSections.add(key);
+                updateParentHeight(el);
+            } else {
+                body.style.maxHeight = '0';
+                el.classList.add('collapsed');
+                expandedSections.delete(key);
+            }
+        }
+        
+        function toggleSection(courseIdx, chIdx, secIdx) {
+            const section = catalogsData[courseIdx].chapters[chIdx].sections[secIdx];
+            const select = !isSectionSelected(courseIdx, chIdx, secIdx);
+            
+            section.items.forEach((_, itemIdx) => {
+                const key = `${courseIdx}_${chIdx}_${secIdx}_${itemIdx}`;
+                if (select) {
+                    selectedItems.add(key);
+                } else {
+                    selectedItems.delete(key);
+                }
+            });
+            
+            renderCatalog(document.getElementById('searchInput').value);
+        }
+        
+        function toggleItem(courseIdx, chIdx, secIdx, itemIdx) {
+            const key = `${courseIdx}_${chIdx}_${secIdx}_${itemIdx}`;
+            if (selectedItems.has(key)) {
+                selectedItems.delete(key);
+            } else {
+                selectedItems.add(key);
+            }
+            renderCatalog(document.getElementById('searchInput').value);
+        }
+        
+        function removeItem(courseIdx, chIdx, secIdx, itemIdx) {
+            const key = `${courseIdx}_${chIdx}_${secIdx}_${itemIdx}`;
+            selectedItems.delete(key);
+            renderCatalog(document.getElementById('searchInput').value);
+        }
+        
+        function isSectionSelected(courseIdx, chIdx, secIdx) {
+            const section = catalogsData[courseIdx].chapters[chIdx].sections[secIdx];
+            return section.items.every((_, itemIdx) => 
+                selectedItems.has(`${courseIdx}_${chIdx}_${secIdx}_${itemIdx}`)
+            );
+        }
+        
+        function selectAll() {
+            catalogsData.forEach((catalog, courseIdx) => {
+                catalog.chapters.forEach((ch, chIdx) => {
+                    ch.sections.forEach((sec, secIdx) => {
+                        sec.items.forEach((_, itemIdx) => {
+                            selectedItems.add(`${courseIdx}_${chIdx}_${secIdx}_${itemIdx}`);
+                        });
+                    });
+                });
+            });
+            renderCatalog(document.getElementById('searchInput').value);
+        }
+        
+        function selectNone() {
+            selectedItems.clear();
+            renderCatalog(document.getElementById('searchInput').value);
+        }
+        
+        function expandAll() {
+            // 先展开所有 section
+            document.querySelectorAll('.section').forEach(el => {
+                el.classList.remove('collapsed');
+                const body = el.querySelector('.section-body');
+                if (body) body.style.maxHeight = 'none';
+                const match = el.id.match(/section_(\d+)_(\d+)_(\d+)/);
+                if (match) expandedSections.add(`${match[1]}_${match[2]}_${match[3]}`);
+            });
+            // 再展开所有 chapter
+            document.querySelectorAll('.chapter').forEach(el => {
+                el.classList.remove('collapsed');
+                const body = el.querySelector('.chapter-body');
+                if (body) body.style.maxHeight = 'none';
+                const match = el.id.match(/chapter_(\d+)_(\d+)/);
+                if (match) expandedChapters.add(`${match[1]}_${match[2]}`);
+            });
+            // 最后展开所有 course
+            document.querySelectorAll('.course').forEach(el => {
+                el.classList.remove('collapsed');
+                const body = el.querySelector('.course-body');
+                if (body) body.style.maxHeight = 'none';
+                const courseIdx = parseInt(el.id.replace('course_', ''));
+                expandedCourses.add(courseIdx);
+            });
+        }
+        
+        function collapseAll() {
+            document.querySelectorAll('.course').forEach(el => {
+                const body = el.querySelector('.course-body');
+                if (body) body.style.maxHeight = '0';
+                el.classList.add('collapsed');
+            });
+            document.querySelectorAll('.chapter').forEach(el => {
+                const body = el.querySelector('.chapter-body');
+                if (body) body.style.maxHeight = '0';
+                el.classList.add('collapsed');
+            });
+            document.querySelectorAll('.section').forEach(el => {
+                const body = el.querySelector('.section-body');
+                if (body) body.style.maxHeight = '0';
+                el.classList.add('collapsed');
+            });
+            expandedCourses.clear();
+            expandedChapters.clear();
+            expandedSections.clear();
+        }
+        
+        function updateCount() {
+            const count = selectedItems.size;
+            document.getElementById('selectedCount').textContent = `${count} 项`;
+            document.getElementById('totalCount').textContent = count;
+            document.getElementById('btnConfirm').disabled = count === 0;
+        }
+        
+        function confirmSelection() {
+            const result = [];
+            
+            selectedItems.forEach(key => {
+                const [courseIdx, chIdx, secIdx, itemIdx] = key.split('_').map(Number);
+                const catalog = catalogsData[courseIdx];
+                const chapter = catalog.chapters[chIdx];
+                const section = chapter.sections[secIdx];
+                const item = section.items[itemIdx];
+                
+                result.push({
+                    course_id: catalog.course_id,
+                    course_name: catalog.course_name,
+                    chapter_id: chapter.id,
+                    chapter_name: chapter.name,
+                    section_id: section.id,
+                    section_name: section.name,
+                    item_id: item.id,
+                    item_name: item.name,
+                    item_type: item.type
+                });
+            });
+            
+            // 禁用确认按钮，防止重复提交
+            const btnConfirm = document.getElementById('btnConfirm');
+            btnConfirm.disabled = true;
+            btnConfirm.textContent = '保存中...';
+            
+            // 获取所有课程名称
+            const courseNames = [...new Set(result.map(r => r.course_name))].join('、');
+            
+            fetch('/api/selection', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    course_name: courseNames,
+                    selected: result
+                })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(() => {
+                // 显示成功提示后自动关闭
+                const footer = document.querySelector('.footer');
+                footer.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1;">
+                        <div style="width: 2rem; height: 2rem; background: rgba(34, 197, 94, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <span style="color: #22c55e; font-weight: 500;">选择已保存成功！窗口即将关闭...</span>
+                    </div>
+                `;
+                // 延迟1.5秒后自动关闭窗口
+                setTimeout(() => window.close(), 1500);
+            })
+            .catch(err => {
+                alert('保存失败: ' + err.message);
+                btnConfirm.disabled = false;
+                btnConfirm.textContent = '确认选择';
+            });
+        }
+        
+        function cancel() {
+            if (confirm('确定取消选择吗？')) {
+                window.close();
+            }
+        }
+        
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            if (searchTimer) clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                renderCatalog(e.target.value);
+            }, 200);
+        });
+        
+        loadCatalog();
+    </script>
+</body>
+</html>

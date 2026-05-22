@@ -1,0 +1,33 @@
+# ==================================================
+# 蓝桥SaaS平台自动化周报系统 - 依赖包列表
+# ==================================================
+# 使用方法：
+#   pip install -r requirements.txt
+#
+# 如果下载慢，可以使用国内镜像：
+#   pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+# ==================================================
+
+# 浏览器自动化
+selenium>=4.15.0
+
+# AI接口
+openai>=1.0.0
+
+# 环境变量管理
+python-dotenv>=1.0.0
+
+# 日志
+loguru>=0.7.0
+
+# Web服务器（可视化选择界面）
+flask>=3.0.0
+
+# HTTP请求库（部分依赖需要）
+requests>=2.28.0
+
+# 网络请求（selenium依赖）
+urllib3>=1.26.0
+
+# 数据处理（标准库增强）
+typing-extensions>=4.0.0

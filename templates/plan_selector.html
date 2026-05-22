@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>下周计划</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030304;
+            --surface: #18181b;
+            --surface-hover: #1f1f23;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --text: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #52525b;
+            --accent: #8b5cf6;
+            --accent-soft: rgba(139, 92, 246, 0.1);
+            --success: #22c55e;
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 40vh;
+            background: radial-gradient(ellipse at top, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 2rem 3rem;
+        }
+        
+        .header {
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+        
+        .steps {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+        
+        .step:hover {
+            border-color: var(--border-hover);
+        }
+        
+        .step.active {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+        
+        .step.completed {
+            border-color: var(--success);
+            background: rgba(34, 197, 94, 0.1);
+        }
+        
+        .step .step-number {
+            width: 1.5rem; height: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .step.active .step-number {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .step.completed .step-number {
+            background: var(--success);
+            color: white;
+        }
+        
+        .step.completed .step-number::after {
+            content: '✓';
+        }
+        
+        .step.completed .step-number span {
+            display: none;
+        }
+        
+        .content-area {
+            display: flex;
+            gap: 1.25rem;
+        }
+        
+        .tree-panel {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .panel-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .panel-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .panel-body {
+            padding: 0.75rem;
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        
+        .course {
+            margin-bottom: 1rem;
+            background: var(--surface);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+        
+        .course:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px var(--accent-soft);
+        }
+        
+        .course-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            background: var(--accent-soft);
+        }
+        
+        .course-header:hover {
+            background: rgba(139, 92, 246, 0.15);
+        }
+        
+        .course-title {
+            flex: 1;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .course-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .course-count {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--bg);
+            padding: 0.25rem 0.625rem;
+            border-radius: 100px;
+        }
+        
+        .course-body {
+            padding: 0.75rem;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .course.collapsed .course-body {
+            max-height: 0 !important;
+            padding: 0 0.75rem;
+        }
+        
+        .collapsed > .course-header .toggle-arrow,
+        .collapsed > .chapter-header .toggle-arrow,
+        .collapsed > .section-header .toggle-arrow {
+            transform: rotate(-90deg);
+        }
+        
+        .chapter {
+            margin-bottom: 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+        
+        .chapter-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+        
+        .chapter-header:hover {
+            background: var(--surface-hover);
+        }
+        
+        .chapter-title {
+            flex: 1;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .toggle-arrow {
+            width: 1rem; height: 1rem;
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chapter-body {
+            border-top: 1px solid var(--border);
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .chapter.collapsed .chapter-body {
+            max-height: 0 !important;
+            border-top: none;
+        }
+        
+        .section {
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.625rem 1rem 0.625rem 2.5rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+        
+        .section-header:hover {
+            background: var(--surface-hover);
+        }
+        
+        .section-title {
+            flex: 1;
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+        
+        .section-body {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .section.collapsed .section-body {
+            max-height: 0 !important;
+        }
+        
+        .items-container {
+            padding: 0 0.5rem 0.5rem 3.25rem;
+        }
+        
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.625rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .item:hover {
+            background: var(--surface-hover);
+        }
+        
+        .item.selected {
+            background: var(--accent-soft);
+        }
+        
+        .item .check {
+            width: 1.125rem; height: 1.125rem;
+            border: 2px solid var(--text-muted);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        
+        .item.selected .check {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .item.selected .check::after {
+            content: '✓';
+            color: white;
+            font-size: 10px;
+        }
+        
+        .item-name {
+            flex: 1;
+            font-size: 0.8125rem;
+        }
+        
+        .plan-summary {
+            width: 320px;
+            flex-shrink: 0;
+        }
+        
+        .summary-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: sticky;
+            top: 2rem;
+        }
+        
+        .summary-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .summary-body {
+            padding: 1rem;
+            max-height: 45vh;
+            overflow-y: auto;
+        }
+        
+        .summary-day {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.625rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+            font-size: 0.8125rem;
+        }
+        
+        .summary-day.has-content {
+            background: var(--bg);
+            border: 1px solid var(--border);
+        }
+        
+        .summary-day .day-label {
+            font-weight: 600;
+            min-width: 2.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .summary-day .day-content {
+            flex: 1;
+            color: var(--text);
+        }
+        
+        .summary-day .day-empty {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        
+        .summary-day .day-items {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .summary-day .day-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.25rem 0;
+        }
+        
+        .summary-day .day-item-name {
+            flex: 1;
+            color: var(--text);
+            font-size: 0.8125rem;
+        }
+        
+        .remove-btn {
+            width: 1.375rem;
+            height: 1.375rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+        
+        .remove-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding: 1.25rem 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+        
+        .footer-info {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .footer-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-ghost:hover {
+            background: var(--surface-hover);
+            color: var(--text);
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #7c3aed;
+        }
+        
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.8125rem;
+        }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>下周计划</h1>
+            <p>依次点击每天，从目录中选择要学习的内容</p>
+        </div>
+        
+        <div class="steps" id="steps"></div>
+        
+        <div class="content-area">
+            <div class="tree-panel">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <span class="panel-title" id="panelTitle">周一 - 选择学习内容</span>
+                    </div>
+                    <div class="panel-body" id="treeContent">
+                        <div class="empty-state">加载中...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="plan-summary">
+                <div class="summary-card">
+                    <div class="summary-header">
+                        <span class="panel-title">计划预览</span>
+                    </div>
+                    <div class="summary-body" id="planSummary"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="footer-info" id="footerInfo">请为每天选择学习内容</div>
+            <div class="footer-actions">
+                <button class="btn btn-ghost" onclick="cancel()">取消</button>
+                <button class="btn btn-primary" id="btnConfirm" onclick="confirmPlan()" disabled>确认计划</button>
+            </div>
+        </div>
+        
+        <!-- 免责声明 -->
+        <div class="disclaimer" style="margin-top: 2rem; padding: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);">
+            <h3 style="color: #ef4444; font-size: 1rem; margin-bottom: 0.75rem; font-weight: 600;">⚠️ 免责声明</h3>
+            <p style="color: var(--text-secondary); font-size: 0.8125rem; line-height: 1.6; margin-bottom: 0.75rem;">
+                本工具仅供学习交流使用，旨在帮助用户提高学习效率。使用本工具生成的内容仅供参考，请勿直接用于正式提交的周报或作业。
+            </p>
+            <p style="color: var(--text-secondary); font-size: 0.8125rem; line-height: 1.6; margin-bottom: 0.75rem;">
+                <strong style="color: #ef4444;">重要警告：</strong>严禁将本工具用于任何违法用途或商业用途。任何因使用本工具而产生的法律责任，由使用者自行承担，与开发者无关。
+            </p>
+            <p style="color: var(--text-secondary); font-size: 0.8125rem; line-height: 1.6;">
+                使用本工具即表示您已阅读并同意上述声明。如有违反，一切后果由使用者自行承担。
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        let catalogsData = [];  // 存储所有课程的目录数据
+        const days = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
+        let currentDayIndex = 0;
+        let planByDay = {};
+        let expandedCourses = new Set();  // 保存展开的课程状态
+        let expandedChapters = new Set();  // 保存展开的章节状态
+        let expandedSections = new Set();  // 保存展开的小节状态
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        days.forEach(day => { planByDay[day] = []; });
+        
+        async function loadCatalog() {
+            try {
+                // 尝试获取所有课程目录
+                const response = await fetch('/api/all-catalogs');
+                if (!response.ok) throw new Error('获取目录失败');
+                
+                const data = await response.json();
+                catalogsData = data.courses || [];
+                
+                if (catalogsData.length === 0) {
+                    document.getElementById('treeContent').innerHTML = '<div class="empty-state">未找到课程目录</div>';
+                    return;
+                }
+                
+                // 默认关闭所有课程目录
+                renderTree();
+                renderSteps();
+                renderPlanSummary();
+                updatePanelTitle();
+            } catch (error) {
+                // 如果获取所有课程失败，尝试单课程模式
+                const params = new URLSearchParams(window.location.search);
+                const courseId = params.get('course_id');
+                if (courseId) {
+                    try {
+                        const response = await fetch(`/api/catalog/${courseId}`);
+                        if (!response.ok) throw new Error('获取目录失败');
+                        const catalog = await response.json();
+                        catalogsData = [catalog];
+                        // 默认关闭目录
+                        renderTree();
+                        renderSteps();
+                        renderPlanSummary();
+                        updatePanelTitle();
+                    } catch (e) {
+                        document.getElementById('treeContent').innerHTML = 
+                            `<div class="empty-state">加载失败: ${e.message}</div>`;
+                    }
+                } else {
+                    document.getElementById('treeContent').innerHTML = 
+                        `<div class="empty-state">加载失败: ${error.message}</div>`;
+                }
+            }
+        }
+        
+        function renderTree() {
+            if (!catalogsData || catalogsData.length === 0) return;
+            
+            // 保存当前展开状态（仅在非首次渲染时）
+            if (document.querySelectorAll('.course').length > 0) {
+                saveExpandedState();
+            }
+            
+            const treeContent = document.getElementById('treeContent');
+            const currentDay = days[currentDayIndex];
+            const selectedForDay = planByDay[currentDay];
+            
+            let html = '';
+            
+            catalogsData.forEach((catalog, courseIdx) => {
+                let chaptersHtml = '';
+                
+                catalog.chapters.forEach((chapter, chIdx) => {
+                    let sectionsHtml = '';
+                    
+                    chapter.sections.forEach((section, secIdx) => {
+                        let itemsHtml = '';
+                        
+                        section.items.forEach((item, itemIdx) => {
+                            const isSelected = selectedForDay.some(p => p.id === `${courseIdx}_${chIdx}_${secIdx}_${itemIdx}`);
+                            
+                            itemsHtml += `
+                                <div class="item ${isSelected ? 'selected' : ''}" data-action="toggleItem" data-course="${courseIdx}" data-ch="${chIdx}" data-sec="${secIdx}" data-item="${itemIdx}">
+                                    <div class="check"></div>
+                                    <span class="item-name">${escapeHtml(item.name)}</span>
+                                </div>
+                            `;
+                        });
+                        
+                        if (!itemsHtml) return;
+                        
+                        const isSectionExpanded = expandedSections.has(`${courseIdx}_${chIdx}_${secIdx}`);
+                        
+                        sectionsHtml += `
+                            <div class="section ${isSectionExpanded ? '' : 'collapsed'}" id="section_${courseIdx}_${chIdx}_${secIdx}">
+                                <div class="section-header" data-action="toggleSection" data-course="${courseIdx}" data-ch="${chIdx}" data-sec="${secIdx}">
+                                    <span class="section-title">${escapeHtml(section.name)}</span>
+                                    <div class="toggle-arrow">▼</div>
+                                </div>
+                                <div class="section-body">
+                                    <div class="items-container">${itemsHtml}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    if (!sectionsHtml) return;
+                    
+                    const isChapterExpanded = expandedChapters.has(`${courseIdx}_${chIdx}`);
+                    
+                    chaptersHtml += `
+                        <div class="chapter ${isChapterExpanded ? '' : 'collapsed'}" id="chapter_${courseIdx}_${chIdx}">
+                            <div class="chapter-header" data-action="toggleChapter" data-course="${courseIdx}" data-ch="${chIdx}">
+                                <span class="chapter-title">${escapeHtml(chapter.name)}</span>
+                                <div class="toggle-arrow">▼</div>
+                            </div>
+                            <div class="chapter-body">
+                                ${sectionsHtml}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                if (!chaptersHtml) return;
+                
+                const isCourseExpanded = expandedCourses.has(courseIdx);
+                
+                html += `
+                    <div class="course ${isCourseExpanded ? '' : 'collapsed'}" id="course_${courseIdx}">
+                        <div class="course-header" data-action="toggleCourse" data-course="${courseIdx}">
+                            <span class="course-title">${escapeHtml(catalog.course_name)}</span>
+                            <div class="course-meta">
+                                <span class="course-count">${catalog.chapters.length} 章</span>
+                                <div class="toggle-arrow">▼</div>
+                            </div>
+                        </div>
+                        <div class="course-body">
+                            ${chaptersHtml}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            treeContent.innerHTML = html || '<div class="empty-state">暂无可用内容</div>';
+            
+            // 使用事件委托
+            treeContent.onclick = handleClick;
+            
+            // 恢复展开状态
+            restoreExpandedState();
+        }
+        
+        function saveExpandedState() {
+            // 保存课程展开状态
+            document.querySelectorAll('.course').forEach(el => {
+                const courseIdx = parseInt(el.id.replace('course_', ''));
+                if (!el.classList.contains('collapsed')) {
+                    expandedCourses.add(courseIdx);
+                } else {
+                    expandedCourses.delete(courseIdx);
+                }
+            });
+            
+            // 保存章节展开状态
+            document.querySelectorAll('.chapter').forEach(el => {
+                const match = el.id.match(/chapter_(\d+)_(\d+)/);
+                if (match) {
+                    const key = `${match[1]}_${match[2]}`;
+                    if (!el.classList.contains('collapsed')) {
+                        expandedChapters.add(key);
+                    } else {
+                        expandedChapters.delete(key);
+                    }
+                }
+            });
+            
+            // 保存小节展开状态
+            document.querySelectorAll('.section').forEach(el => {
+                const match = el.id.match(/section_(\d+)_(\d+)_(\d+)/);
+                if (match) {
+                    const key = `${match[1]}_${match[2]}_${match[3]}`;
+                    if (!el.classList.contains('collapsed')) {
+                        expandedSections.add(key);
+                    } else {
+                        expandedSections.delete(key);
+                    }
+                }
+            });
+        }
+        
+        function restoreExpandedState() {
+            // 先恢复小节展开状态（子元素先展开）
+            expandedSections.forEach(key => {
+                const el = document.getElementById(`section_${key}`);
+                if (el) {
+                    el.classList.remove('collapsed');
+                    const body = el.querySelector('.section-body');
+                    if (body) {
+                        body.style.maxHeight = 'none';
+                    }
+                }
+            });
+            
+            // 再恢复章节展开状态
+            expandedChapters.forEach(key => {
+                const el = document.getElementById(`chapter_${key}`);
+                if (el) {
+                    el.classList.remove('collapsed');
+                    const body = el.querySelector('.chapter-body');
+                    if (body) {
+                        body.style.maxHeight = 'none';
+                    }
+                }
+            });
+            
+            // 最后恢复课程展开状态
+            expandedCourses.forEach(courseIdx => {
+                const el = document.getElementById(`course_${courseIdx}`);
+                if (el) {
+                    el.classList.remove('collapsed');
+                    const body = el.querySelector('.course-body');
+                    if (body) {
+                        body.style.maxHeight = 'none';
+                    }
+                }
+            });
+        }
+        
+        function updateParentHeight(el) {
+            // 更新父元素的 max-height
+            const section = el.closest('.section');
+            if (section && !section.classList.contains('collapsed')) {
+                const sectionBody = section.querySelector('.section-body');
+                if (sectionBody) {
+                    sectionBody.style.maxHeight = 'none';
+                }
+            }
+            
+            const chapter = el.closest('.chapter');
+            if (chapter && !chapter.classList.contains('collapsed')) {
+                const chapterBody = chapter.querySelector('.chapter-body');
+                if (chapterBody) {
+                    chapterBody.style.maxHeight = 'none';
+                }
+            }
+            
+            const course = el.closest('.course');
+            if (course && !course.classList.contains('collapsed')) {
+                const courseBody = course.querySelector('.course-body');
+                if (courseBody) {
+                    courseBody.style.maxHeight = 'none';
+                }
+            }
+        }
+        
+        function handleClick(e) {
+            const target = e.target.closest('[data-action]');
+            if (!target) return;
+            
+            const action = target.dataset.action;
+            const courseIdx = parseInt(target.dataset.course);
+            const chIdx = parseInt(target.dataset.ch);
+            const secIdx = parseInt(target.dataset.sec);
+            const itemIdx = parseInt(target.dataset.item);
+            
+            e.stopPropagation();
+            
+            switch(action) {
+                case 'toggleCourse':
+                    toggleCourse(courseIdx);
+                    break;
+                case 'toggleChapter':
+                    toggleChapter(courseIdx, chIdx);
+                    break;
+                case 'toggleSection':
+                    toggleSection(courseIdx, chIdx, secIdx);
+                    break;
+                case 'toggleItem':
+                    toggleItem(courseIdx, chIdx, secIdx, itemIdx);
+                    break;
+            }
+        }
+        
+        function toggleCourse(courseIdx) {
+            const el = document.getElementById(`course_${courseIdx}`);
+            if (!el) return;
+            
+            const body = el.querySelector('.course-body');
+            const isCollapsed = el.classList.contains('collapsed');
+            
+            if (isCollapsed) {
+                el.classList.remove('collapsed');
+                body.style.maxHeight = 'none';
+                expandedCourses.add(courseIdx);
+            } else {
+                body.style.maxHeight = '0';
+                el.classList.add('collapsed');
+                expandedCourses.delete(courseIdx);
+            }
+        }
+        
+        function toggleChapter(courseIdx, chIdx) {
+            const el = document.getElementById(`chapter_${courseIdx}_${chIdx}`);
+            if (!el) return;
+            
+            const body = el.querySelector('.chapter-body');
+            const isCollapsed = el.classList.contains('collapsed');
+            const key = `${courseIdx}_${chIdx}`;
+            
+            if (isCollapsed) {
+                el.classList.remove('collapsed');
+                body.style.maxHeight = 'none';
+                expandedChapters.add(key);
+                updateParentHeight(el);
+            } else {
+                body.style.maxHeight = '0';
+                el.classList.add('collapsed');
+                expandedChapters.delete(key);
+            }
+        }
+        
+        function toggleSection(courseIdx, chIdx, secIdx) {
+            const el = document.getElementById(`section_${courseIdx}_${chIdx}_${secIdx}`);
+            if (!el) return;
+            
+            const body = el.querySelector('.section-body');
+            const isCollapsed = el.classList.contains('collapsed');
+            const key = `${courseIdx}_${chIdx}_${secIdx}`;
+            
+            if (isCollapsed) {
+                el.classList.remove('collapsed');
+                body.style.maxHeight = 'none';
+                expandedSections.add(key);
+                updateParentHeight(el);
+            } else {
+                body.style.maxHeight = '0';
+                el.classList.add('collapsed');
+                expandedSections.delete(key);
+            }
+        }
+        
+        function toggleItem(courseIdx, chIdx, secIdx, itemIdx) {
+            const currentDay = days[currentDayIndex];
+            const itemId = `${courseIdx}_${chIdx}_${secIdx}_${itemIdx}`;
+            
+            const catalog = catalogsData[courseIdx];
+            const chapter = catalog.chapters[chIdx];
+            const section = chapter.sections[secIdx];
+            const item = section.items[itemIdx];
+            
+            const existingIndex = planByDay[currentDay].findIndex(p => p.id === itemId);
+            
+            if (existingIndex >= 0) {
+                planByDay[currentDay].splice(existingIndex, 1);
+            } else {
+                planByDay[currentDay].push({
+                    id: itemId,
+                    name: item.name,
+                    course_name: catalog.course_name
+                });
+            }
+            
+            renderTree();
+            renderPlanSummary();
+        }
+        
+        function renderSteps() {
+            const stepsEl = document.getElementById('steps');
+            let html = '';
+            
+            days.forEach((day, idx) => {
+                let status = '';
+                if (idx < currentDayIndex) status = 'completed';
+                else if (idx === currentDayIndex) status = 'active';
+                
+                html += `
+                    <div class="step ${status}" onclick="goToDay(${idx})">
+                        <div class="step-number"><span>${idx + 1}</span></div>
+                        <span>${day}</span>
+                    </div>
+                `;
+            });
+            
+            stepsEl.innerHTML = html;
+        }
+        
+        function renderPlanSummary() {
+            const summaryEl = document.getElementById('planSummary');
+            let html = '';
+            
+            days.forEach((day, dayIdx) => {
+                const items = planByDay[day];
+                const hasContent = items.length > 0;
+                
+                if (hasContent) {
+                    html += `
+                        <div class="summary-day has-content">
+                            <span class="day-label">${day}</span>
+                            <div class="day-items">
+                                ${items.map((item, itemIdx) => `
+                                    <div class="day-item">
+                                        <span class="day-item-name">${escapeHtml(cleanItemName(item.name))}</span>
+                                        <button class="remove-btn" onclick="removePlanItem('${day}', ${itemIdx})" title="取消选择">×</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="summary-day">
+                            <span class="day-label">${day}</span>
+                            <span class="day-content">
+                                <span class="day-empty">未选择</span>
+                            </span>
+                        </div>
+                    `;
+                }
+            });
+            
+            summaryEl.innerHTML = html;
+            updateFooterInfo();
+        }
+        
+        function cleanItemName(name) {
+            // 过滤掉{}、【】、（）等符号
+            return name.replace(/[{}【】（）\[\]()]/g, '').trim();
+        }
+        
+        function removePlanItem(day, itemIdx) {
+            planByDay[day].splice(itemIdx, 1);
+            renderTree();
+            renderPlanSummary();
+        }
+        
+        function updatePanelTitle() {
+            const currentDay = days[currentDayIndex];
+            document.getElementById('panelTitle').textContent = `${currentDay} - 选择学习内容`;
+        }
+        
+        function updateFooterInfo() {
+            const totalItems = Object.values(planByDay).reduce((sum, items) => sum + items.length, 0);
+            const completedDays = days.filter(day => planByDay[day].length > 0).length;
+            
+            document.getElementById('footerInfo').textContent = 
+                `已选择 ${totalItems} 项内容，${completedDays}/${days.length} 天已安排`;
+            
+            document.getElementById('btnConfirm').disabled = completedDays === 0;
+        }
+        
+        function goToDay(idx) {
+            currentDayIndex = idx;
+            renderSteps();
+            renderTree();
+            updatePanelTitle();
+        }
+        
+        function confirmPlan() {
+            const planItems = [];
+            
+            days.forEach(day => {
+                planByDay[day].forEach(item => {
+                    planItems.push({
+                        day: day,
+                        item_name: cleanItemName(item.name),
+                        course_name: item.course_name
+                    });
+                });
+            });
+            
+            if (planItems.length === 0) {
+                alert('请至少安排一天的内容');
+                return;
+            }
+            
+            // 禁用确认按钮，防止重复提交
+            const btnConfirm = document.getElementById('btnConfirm');
+            btnConfirm.disabled = true;
+            btnConfirm.textContent = '保存中...';
+            
+            // 获取所有课程名称
+            const courseNames = [...new Set(planItems.map(p => p.course_name))].join('、');
+            
+            fetch('/api/plan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    course_name: courseNames,
+                    plan_items: planItems
+                })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(() => {
+                // 显示成功提示后自动关闭
+                const footer = document.querySelector('.footer');
+                footer.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1;">
+                        <div style="width: 2rem; height: 2rem; background: rgba(34, 197, 94, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        </div>
+                        <span style="color: #22c55e; font-weight: 500;">计划已保存成功！窗口即将关闭...</span>
+                    </div>
+                `;
+                // 延迟1.5秒后自动关闭窗口
+                setTimeout(() => window.close(), 1500);
+            })
+            .catch(err => {
+                alert('保存失败: ' + err.message);
+                btnConfirm.disabled = false;
+                btnConfirm.textContent = '确认计划';
+            });
+        }
+        
+        function cancel() {
+            if (confirm('确定取消吗？')) {
+                window.close();
+            }
+        }
+        
+        loadCatalog();
+    </script>
+</body>
+</html>
