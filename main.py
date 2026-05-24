@@ -3,6 +3,7 @@
 V4.1 — 可视化章节选择 + 兼容性增强
 """
 
+import os
 import sys
 import argparse
 from datetime import date
@@ -10,12 +11,17 @@ from pathlib import Path
 from typing import List
 
 # 修复 Windows 终端 emoji 编码问题
-if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-        sys.stderr.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
+# sys.stdout.reconfigure 是 Python 3.7+ 的特性
+if hasattr(sys.stdout, 'reconfigure'):
+    if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+            sys.stderr.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
+
+# 设置默认编码环境变量（影响 subprocess 等子进程）
+os.environ.setdefault('PYTHONIOENCODING', 'utf-8')
 
 # 添加src到路径（使用绝对路径，确保从任意工作目录运行都能正确 import）
 sys.path.insert(0, str(Path(__file__).parent))

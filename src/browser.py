@@ -5,6 +5,7 @@
 """
 
 import os
+import sys
 import time
 import shutil
 import glob
@@ -25,9 +26,9 @@ from src.logger import logger, log_manager
 
 # 浏览器进程名映射
 BROWSER_PROCESSES = {
-    "chrome": ["chromedriver.exe"],  # 只清理驱动，不清理浏览器
-    "edge": ["msedgedriver.exe"],
-    "firefox": ["geckodriver.exe"],
+    "chrome": ["chromedriver.exe", "chromedriver"],  # 只清理驱动，不清理浏览器
+    "edge": ["msedgedriver.exe", "msedgedriver"],
+    "firefox": ["geckodriver.exe", "geckodriver"],
 }
 
 
@@ -42,8 +43,21 @@ def cleanup_browser_processes(browser_type: str = "all"):
             processes = BROWSER_PROCESSES.get(browser_type, [])
         
         for proc in processes:
-            subprocess.run(["taskkill", "/F", "/IM", proc], 
-                           capture_output=True, text=True)
+            try:
+                if sys.platform == "win32":
+                    subprocess.run(["taskkill", "/F", "/IM", proc], 
+                                   capture_output=True, text=True)
+                else:
+                    # macOS/Linux: 使用 pkill
+                    subprocess.run(["pkill", "-f", proc], 
+                                   capture_output=True, text=True)
+            except FileNotFoundError:
+                # pkill 可能不存在，尝试 killall
+                try:
+                    subprocess.run(["killall", proc], 
+                                   capture_output=True, text=True)
+                except Exception:
+                    pass
         
         time.sleep(0.5)
     except Exception as e:
@@ -231,6 +245,7 @@ class BrowserManager:
         
         service = FirefoxService()
         self.driver = webdriver.Firefox(service=service, options=options)
+        self._temp_dir = profile_dir  # Firefox 使用 profile 目录
         self._setup_driver()
     
     def _setup_driver(self):
