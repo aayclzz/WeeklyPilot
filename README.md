@@ -63,9 +63,6 @@ chmod +x run.sh
 
 # 运行程序
 ./run.sh
-
-# 或者使用 Python 脚本
-python3 run.py
 ```
 
 **首次运行时**，程序会弹出 `.env` 文件让你填写账号信息，只需要填 **3 个地方**：
@@ -113,13 +110,11 @@ OPENAI_API_KEY=sk-xxxxxxxxxxxx    ← 改成你的 API Key
 
 | 命令 | 功能 |
 |------|------|
-| `python run.py` | 可视化选择模式（推荐） |
-| `python run.py select` | 可视化选择模式 |
-| `python run.py direct` | 直接输入模式 |
-| `python run.py catalog 61384` | 查看课程目录 |
-| `python run.py test 61384` | 测试模式 |
-| `python run.py clear-cache` | 清除缓存 |
-| `python run.py help` | 查看帮助 |
+| `python main.py --select` | 可视化选择模式（推荐） |
+| `python main.py --direct` | 直接输入模式 |
+| `python main.py --catalog` | 查看课程目录 |
+| `python main.py --test` | 测试模式 |
+| `python main.py --clear-cache` | 清除缓存 |
 
 ---
 
@@ -248,7 +243,6 @@ WeeklyPilot/
 │
 ├── run.bat                     ← Windows 一键启动
 ├── run.sh                      ← macOS/Linux 一键启动
-├── run.py                      ← 跨平台 Python 启动脚本
 ├── main.py                     ← 主程序
 ├── .env                        ← 你的账号密码配置（需要自己创建）
 ├── .env.example                ← 配置文件模板
@@ -372,7 +366,7 @@ browser.py 填写并提交
 ## 更新日志
 
 ### V4.2 (当前版本)
-- ✨ **跨平台支持**：新增 macOS/Linux 支持（run.sh 和 run.py）
+- ✨ **跨平台支持**：新增 macOS/Linux 支持（run.sh）
 - 🔧 修复 run.bat 在某些环境下无法运行的问题（中文注释导致语法错误）
 - 🔧 优化 .gitignore 配置，移除 README.md 的误忽略
 - 🔧 清理调试脚本，保持项目整洁
