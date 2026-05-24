@@ -52,5 +52,7 @@ venv/
 env/
 ENV/
 
-# 已上传的文件
-README.md
+# 调试脚本（开发用，不需要上传）
+debug_*.bat
+test_*.bat
+debug_page.py

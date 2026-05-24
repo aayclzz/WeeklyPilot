@@ -30,7 +30,10 @@
 | 蓝桥账号（手机号 + 密码） | 你们学校给的蓝桥平台账号 |
 | AI 接口密钥（API Key） | 推荐用 [DeepSeek](https://platform.deepseek.com/)（免费有额度），注册后复制 API Key |
 | 课程ID | 从蓝桥云课课程页面URL获取，如 `https://www.lanqiao.cn/courses/61384/` 中的 `61384` |
-| 一台 Windows 电脑 | 工具目前只支持 Windows |
+| Python 3.8+ | https://www.python.org/downloads/ |
+| Chrome/Edge/Firefox 浏览器 | 任意一种即可 |
+
+**支持系统**：Windows、macOS、Linux
 
 ---
 
@@ -40,16 +43,30 @@
 
 如果电脑上还没有 Python，去 https://www.python.org/downloads/ 下载安装（需要 **Python 3.8** 及以上版本）。
 
-> 装的时候记得勾上 **"Add Python to PATH"**
+> 装的时候记得勾上 **"Add Python to PATH"**（Windows）
 
-### 第 2 步：双击运行
+### 第 2 步：运行程序
 
+**Windows 用户**：
 直接双击 `run.bat`，程序会自动完成以下操作：
 
 1. 查找系统中的 Python（支持自定义安装路径、虚拟环境、py 启动器）
 2. 检查 Python 版本是否符合要求
 3. 如果没有 `.env` 配置文件，自动从模板创建并打开记事本让你填写
 4. 如果缺少依赖包，自动使用国内镜像源安装
+
+**macOS/Linux 用户**：
+在终端中运行：
+```bash
+# 首次使用需要添加执行权限
+chmod +x run.sh
+
+# 运行程序
+./run.sh
+
+# 或者使用 Python 脚本
+python3 run.py
+```
 
 **首次运行时**，程序会弹出 `.env` 文件让你填写账号信息，只需要填 **3 个地方**：
 
@@ -68,6 +85,8 @@ OPENAI_API_KEY=sk-xxxxxxxxxxxx    ← 改成你的 API Key
 
 ## 所有命令一览
 
+### Windows
+
 | 命令 | 功能 | 什么时候用 |
 |------|------|-----------|
 | `run.bat` | 可视化选择模式（推荐） | 每周交周报时 |
@@ -78,13 +97,39 @@ OPENAI_API_KEY=sk-xxxxxxxxxxxx    ← 改成你的 API Key
 | `run.bat clear-cache` | 清除缓存 | 课程目录更新后刷新 |
 | `run.bat help` | 查看帮助 | 忘了有哪些命令 |
 
+### macOS/Linux
+
+| 命令 | 功能 | 什么时候用 |
+|------|------|-----------|
+| `./run.sh` | 可视化选择模式（推荐） | 每周交周报时 |
+| `./run.sh select` | 可视化选择模式 | 通过浏览器选择章节 |
+| `./run.sh direct` | 直接输入模式 | 通过命令行选择章节编号 |
+| `./run.sh catalog 61384` | 查看课程目录 | 查看课程有哪些章节 |
+| `./run.sh test 61384` | 测试模式 | 测试生成效果（不提交） |
+| `./run.sh clear-cache` | 清除缓存 | 课程目录更新后刷新 |
+| `./run.sh help` | 查看帮助 | 忘了有哪些命令 |
+
+### 通用（Python 脚本）
+
+| 命令 | 功能 |
+|------|------|
+| `python run.py` | 可视化选择模式（推荐） |
+| `python run.py select` | 可视化选择模式 |
+| `python run.py direct` | 直接输入模式 |
+| `python run.py catalog 61384` | 查看课程目录 |
+| `python run.py test 61384` | 测试模式 |
+| `python run.py clear-cache` | 清除缓存 |
+| `python run.py help` | 查看帮助 |
+
 ---
 
 ## 使用流程
 
 ### 方式一：可视化选择（推荐）
 
-1. 运行 `run.bat` 或 `run.bat select`
+1. 运行程序：
+   - Windows: `run.bat` 或 `run.bat select`
+   - macOS/Linux: `./run.sh` 或 `./run.sh select`
 2. 输入课程ID（如 `61384`）
 3. 浏览器自动打开选择界面
 4. 勾选需要写入周报的章节/小节
@@ -94,7 +139,9 @@ OPENAI_API_KEY=sk-xxxxxxxxxxxx    ← 改成你的 API Key
 
 ### 方式二：直接输入
 
-1. 运行 `run.bat direct`
+1. 运行程序：
+   - Windows: `run.bat direct`
+   - macOS/Linux: `./run.sh direct`
 2. 输入课程ID
 3. 查看显示的章节列表
 4. 输入要选择的编号（如 `1,3,5-8`）
@@ -197,13 +244,16 @@ run.bat catalog 61384
 ## 文件说明
 
 ```
-蓝桥周报自动化系统/
+WeeklyPilot/
 │
-├── run.bat                     ← 双击这个运行（一键启动）
+├── run.bat                     ← Windows 一键启动
+├── run.sh                      ← macOS/Linux 一键启动
+├── run.py                      ← 跨平台 Python 启动脚本
 ├── main.py                     ← 主程序
 ├── .env                        ← 你的账号密码配置（需要自己创建）
 ├── .env.example                ← 配置文件模板
 ├── requirements.txt            ← Python 依赖列表
+├── cleanup.bat                 ← Windows 浏览器进程清理
 │
 ├── src/                        ← 代码都在这里
 │   ├── config.py               ← 读取 .env 配置
@@ -267,12 +317,18 @@ COURSE_NAMES=数据库技术,国产化操作系统1.8
 
 1. 确认选择的章节是否正确
 2. 检查AI API Key是否有效
-3. 尝试用 `run.bat test 课程ID` 测试
+3. 尝用测试模式测试：
+   - Windows: `run.bat test 课程ID`
+   - macOS/Linux: `./run.sh test 课程ID`
 
 ### 如何清除课程目录缓存？
 
 ```bash
+# Windows
 run.bat clear-cache
+
+# macOS/Linux
+./run.sh clear-cache
 ```
 
 ### API Key 无效？
@@ -315,7 +371,13 @@ browser.py 填写并提交
 
 ## 更新日志
 
-### V4.1 (当前版本)
+### V4.2 (当前版本)
+- ✨ **跨平台支持**：新增 macOS/Linux 支持（run.sh 和 run.py）
+- 🔧 修复 run.bat 在某些环境下无法运行的问题（中文注释导致语法错误）
+- 🔧 优化 .gitignore 配置，移除 README.md 的误忽略
+- 🔧 清理调试脚本，保持项目整洁
+
+### V4.1
 - 🔧 Python 查找逻辑全面重写：支持虚拟环境、py 启动器、自定义安装路径（D:\python.exe 等）
 - 🔧 自动检测并安装依赖（首次运行自动 pip install，使用国内镜像源）
 - 🔧 自动从模板创建 .env 配置文件
